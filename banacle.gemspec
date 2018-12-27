@@ -25,7 +25,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "sinatra-contrib"
+  spec.add_development_dependency "pry"
 
   spec.add_dependency "sinatra"
   spec.add_dependency "unicorn"
+  spec.add_dependency "aws-sdk-ec2"
 end
