@@ -16,8 +16,13 @@ module Banacle
 
       attr_reader :action, :region, :vpc_id, :cidr_blocks
 
-      def as_json
-        self
+      def to_h
+        {
+          action: action,
+          region: region,
+          vpc_id: vpc_id,
+          cidr_blocks: cidr_blocks,
+        }
       end
     end
   end

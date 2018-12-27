@@ -18,7 +18,7 @@ module Banacle
         return SlashCommand::Renderer.render_error(e)
       end
 
-      SlashCommand::Renderer.render(command)
+      SlashCommand::Renderer.render(request.params, command)
     end
 
     def handle_interactive_message(text)

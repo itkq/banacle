@@ -4,25 +4,28 @@ require 'banacle/slash_command/command'
 module Banacle
   module SlashCommand
     class Renderer
-      def self.render(command)
-        new.render(command)
+      def self.render(params, command)
+        new.render(params, command)
       end
 
       def self.render_error(error)
         new.render_error(error)
       end
 
-      def render(command)
+      def render(params, command)
         case command.action
         when Command::LIST_VPC_ACTION
           render_list_vpc(command)
         else
-          render_approval_request(command)
+          render_approval_request(params, command)
         end
       end
 
-      def render_approval_request(command)
-        # TODO: implement
+      def render_error(error)
+        {
+          response_type: "ephemeral",
+          text: "An error occurred: #{error.to_s}",
+        }.to_json
       end
 
       def render_list_vpc(command)
@@ -38,10 +41,48 @@ module Banacle
         }.to_json
       end
 
-      def render_error(error)
+      def render_approval_request(params, command)
+        text = <<-EOS
+<@#{params["user_id"]}> wants to *#{command.action}* CIDRs under the following conditions:
+```
+#{JSON.pretty_generate(command.to_h)}
+```
+        EOS
+
         {
-          response_type: "ephemeral",
-          text: "An error occurred: #{error.to_s}",
+          response_type: "in_channel",
+          text: text,
+          attachments: [
+            {
+              text: "*Approval Request*",
+              fallback: "TBD",
+              callback_id: "banacle_approval_request",
+              color: "#3AA3E3",
+              attachment_type: "default",
+              actions: [
+                {
+                  name: 'approve',
+                  text: 'Approve',
+                  style: 'primary',
+                  type: 'button',
+                  value: 'approve',
+                },
+                {
+                  name: 'reject',
+                  text: 'Reject',
+                  style: 'danger',
+                  type: 'button',
+                  value: 'reject',
+                },
+                {
+                  name: 'cancel',
+                  text: 'Cancel',
+                  type: 'button',
+                  value: 'cancel',
+                },
+              ],
+            },
+          ],
         }.to_json
       end
 
