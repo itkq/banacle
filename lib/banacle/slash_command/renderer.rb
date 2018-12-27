@@ -1,3 +1,4 @@
+require 'banacle/slack'
 require 'banacle/slash_command/builder'
 require 'banacle/slash_command/command'
 

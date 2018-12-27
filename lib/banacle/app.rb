@@ -15,8 +15,7 @@ module Banacle
 
     post '/slack/message' do
       content_type :json
-      # TODO: implement
-      halt 500
+      Handler.new.handle_interactive_message(request)
     end
   end
 end

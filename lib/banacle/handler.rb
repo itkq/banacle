@@ -1,6 +1,10 @@
 require 'banacle/slash_command/error'
 require 'banacle/slash_command/parser'
 require 'banacle/slash_command/renderer'
+
+require 'banacle/interactive_message/parser'
+require 'banacle/interactive_message/renderer'
+
 require 'banacle/slack_validator'
 
 module Banacle
@@ -21,12 +25,15 @@ module Banacle
       SlashCommand::Renderer.render(request.params, command)
     end
 
-    def handle_interactive_message(text)
-      unless SlackValidator.valid_signature?(request)
-        return [401, {}, "invalid request"]
+    def handle_interactive_message(request)
+      unless request.params["skip_validation"] # for debug
+        unless SlackValidator.valid_signature?(request)
+          return [401, {}, "invalid request"]
+        end
       end
 
-      # TODO: implement
+      command = InteractiveMessage::Parser.parse(JSON.parse(request.params["payload"]))
+      InteractiveMessage::Renderer.render(request.params, command)
     end
   end
 end
