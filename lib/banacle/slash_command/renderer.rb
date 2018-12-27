@@ -1,4 +1,5 @@
 require 'banacle/slash_command/builder'
+require 'banacle/slash_command/command'
 
 module Banacle
   module SlashCommand
@@ -13,7 +14,7 @@ module Banacle
 
       def render(command)
         case command.action
-        when Builder::LIST_VPC_ACTION
+        when Command::LIST_VPC_ACTION
           render_list_vpc(command)
         else
           render_approval_request(command)

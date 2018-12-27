@@ -5,12 +5,6 @@ require 'banacle/slash_command/command'
 module Banacle
   module SlashCommand
     class Builder
-      ALLOW_ACTION = 'allow'.freeze
-      DENY_ACTION = 'deny'.freeze
-      LIST_VPC_ACTION = 'listvpc'.freeze
-
-      PERMITTED_ACTIONS = [ALLOW_ACTION, DENY_ACTION, LIST_VPC_ACTION].freeze
-
       class InvalidActionError < Error; end
       class InvalidRegionError < Error; end
       class InvalidVpcError < Error; end
@@ -31,7 +25,7 @@ module Banacle
       def build
         validate!
 
-        if action == LIST_VPC_ACTION
+        if action == Command::LIST_VPC_ACTION
           Command.new(action: action, region: region, vpc_id: nil, cidr_blocks: [])
         else
           Command.new(action: action, region: region, vpc_id: vpc_id, cidr_blocks: cidr_blocks)
@@ -50,8 +44,8 @@ module Banacle
           raise InvalidActionError.new("action is required")
         end
 
-        unless PERMITTED_ACTIONS.include?(action)
-          raise InvalidActionError.new("permitted actions are: (#{PERMITTED_ACTIONS.join("|")})")
+        unless Command::PERMITTED_ACTIONS.include?(action)
+          raise InvalidActionError.new("permitted actions are: (#{Command::PERMITTED_ACTIONS.join("|")})")
         end
       end
 
