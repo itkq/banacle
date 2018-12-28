@@ -69,7 +69,7 @@ module Banacle
             break
           end
         end
-        next_min_rule_number = 1 unless next_min_rule_number
+        next_min_rule_number = 100 unless next_min_rule_number
 
         ec2.create_network_acl_entry(
           cidr_block: cidr_block,
