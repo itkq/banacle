@@ -13,7 +13,7 @@ module Banacle
       #
       # /banacle listvpc [region]
       #
-      # /banacle (allow|deny) [region] [vpc_id] [cidr_block1,cidr_block2,...]
+      # /banacle (create|delete) [region] [vpc_id] [cidr_block1,cidr_block2,...]
       #
       def parse(text)
         elems = text.split(" ")

@@ -44,7 +44,7 @@ module Banacle
 
       def render_approval_request(params, command)
         text = <<-EOS
-<@#{params["user_id"]}> wants to *#{command.action}* CIDRs under the following conditions:
+<@#{params["user_id"]}> wants to *#{command.action} NACL DENY entry* under the following conditions:
 ```
 #{JSON.pretty_generate(command.to_h)}
 ```

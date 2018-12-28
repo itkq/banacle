@@ -44,7 +44,7 @@ module Banacle
           normalize_cidr_blocks!
         end
 
-        if action == Command::ALLOW_ACTION || action == Command::DENY_ACTION
+        if action == Command::CREATE_ACTION || action == Command::DELETE_ACTION
           validate_critical_operation!
         end
       end

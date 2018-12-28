@@ -6,13 +6,17 @@ module Banacle
   module AwsWrapper
     class Nacl
       class EntryDuplicatedError < AwsWrapper::Error; end
+      class EntryNotFoundError < AwsWrapper::Error; end
 
-      def self.create_network_acl_ingress_entries(action:, region:, vpc_id:, cidr_blocks:)
-        new(action, region, vpc_id, cidr_blocks).create_network_acl_ingress_entries
+      def self.create_network_acl_ingress_entries(region:, vpc_id:, cidr_blocks:)
+        new(region, vpc_id, cidr_blocks).create_network_acl_ingress_entries
       end
 
-      def initialize(action, region, vpc_id, cidr_blocks)
-        @action = action
+      def self.delete_network_acl_entries(region:, vpc_id:, cidr_blocks:)
+        new(region, vpc_id, cidr_blocks).delete_network_acl_entries
+      end
+
+      def initialize(region, vpc_id, cidr_blocks)
         @region = region
         @vpc_id = vpc_id
         @cidr_blocks = cidr_blocks
@@ -33,23 +37,30 @@ module Banacle
         end.to_h
       end
 
+      def delete_network_acl_entries
+        cidr_blocks.map do |cidr_block|
+          result = begin
+                     delete_network_acl_entry(cidr_block)
+                     AwsWrapper::Result.new(status: true)
+                   rescue AwsWrapper::Error => e
+                     AwsWrapper::Result.new(status: false, error: e)
+                   end
+          [cidr_block, result]
+        end.to_h
+      end
+
       private
 
       def create_network_acl_ingress_entry(cidr_block)
         ingress_rule_numbers = ingress_rules.map(&:rule_number)
 
-        p ingress_rules
-
         duplicated_rule = ingress_rules.select { |e|
           e.cidr_block == cidr_block
         }.first
-        p duplicated_rule
 
         if duplicated_rule
-          raise EntryDuplicatedError.new("entry already exists (#{duplicated_rule.rule_number}: #{action} #{cidr_block})")
+          raise EntryDuplicatedError.new("entry already exists (rule_number: #{duplicated_rule.rule_number})")
         end
-
-        network_acl_id = acl.network_acl_id
 
         next_min_rule_number = nil
         (0..ingress_rule_numbers.size - 1).each do |i|
@@ -60,16 +71,31 @@ module Banacle
         end
         next_min_rule_number = 1 unless next_min_rule_number
 
-        arg_entry = {
+        ec2.create_network_acl_entry(
           cidr_block: cidr_block,
           egress: false,
           network_acl_id: network_acl_id,
           protocol: "-1", # all protocols
-          rule_action: action,
+          rule_action: "deny",
           rule_number: next_min_rule_number,
-        }
+        )
+      end
 
-        ec2.create_network_acl_entry(arg_entry)
+      def delete_network_acl_entry(cidr_block)
+        target = ingress_rules.select { |e| !e.egress && e.cidr_block == cidr_block }.first
+        if target
+          ec2.delete_network_acl_entry(
+            egress: false,
+            network_acl_id: network_acl_id,
+            rule_number: target.rule_number,
+          )
+        else
+          raise EntryDuplicatedError.new("not found")
+        end
+      end
+
+      def network_acl_id
+        acl.network_acl_id
       end
 
       def ingress_rules
