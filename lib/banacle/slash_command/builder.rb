@@ -39,7 +39,10 @@ module Banacle
         validate_action!
         validate_region!
         validate_vpc_id! if vpc_id
-        validate_cidr_blocks! unless cidr_blocks.empty?
+        unless cidr_blocks.empty?
+          validate_cidr_blocks!
+          normalize_cidr_blocks!
+        end
 
         if action == Command::ALLOW_ACTION || action == Command::DENY_ACTION
           validate_critical_operation!
@@ -61,6 +64,7 @@ module Banacle
           raise InvalidRegionError.new("region is required")
         end
 
+        # TODO: remove aws dependency
         regions = aws.fetch_regions
         unless regions.include?(region)
           raise InvalidRegionError.new("avaliable regions are: (#{regions.join("|")})")
@@ -81,6 +85,13 @@ module Banacle
           rescue IPAddr::InvalidAddressError
             raise InvalidCidrBlockError.new("#{cidr_block} is invalid address")
           end
+        end
+      end
+
+      def normalize_cidr_blocks!
+        cidr_blocks.map! do |c|
+          ip = IPAddr.new(c)
+          "#{ip}/#{ip.prefix}"
         end
       end
 

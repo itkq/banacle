@@ -5,10 +5,17 @@ module Banacle
   module InteractiveMessage
     class Renderer
       def self.render(params, command)
-        new.render(params, command)
+        new(params, command).render
       end
 
-      def render(params, command)
+      def initialize(params, command)
+        @params = params
+        @command = command
+      end
+
+      attr_reader :params, :command
+
+      def render
         payload = JSON.parse(params["payload"], symbolize_names: true)
         action = Slack::Action.new(payload[:actions].first)
 
@@ -23,34 +30,67 @@ module Banacle
         end
       end
 
+      protected
+
+      # override
+      def authenticated_user?
+        true
+      end
+
+      private
 
       def render_approved_message(payload, command)
-        if is_self_action?(payload)
-          render_error("you cannot approve the request by yourself")
+        if self_actioned?
+          return render_error("you cannot approve the request by yourself")
+        end
+
+        if authenticated_user?
+          result = command.execute
+
+          text = original_message_text
+          text += "Result:\n"
+          text += "```\n"
+          text += result
+          text += "```"
+
+          render_replacing_message(text)
         else
+          render_error("you are not permitted to approve the request")
         end
       end
 
       def render_rejected_message(payload, command)
-        if is_self_action?(payload)
-          render_error("you cannot reject the request by yourself")
+        if self_actioned?
+          return render_error("you cannot reject the request by yourself")
+        end
+
+        if authenticated_user?
+          text = original_message_text
+          text += "\nThe request was rejected by <@#{actioner_id}>."
+
+          render_replacing_message(text)
         else
+          render_error("you are not permitted to reject the request")
         end
       end
 
       def render_cancelled_message(payload, command)
-        if is_self_action?(payload)
-          text = payload[:original_message][:text]
+        if self_actioned?
+          text = original_message_text
           text += "\nThe request was cancelled."
 
-          Slack::Response.new(
-            response_type: "in_channel",
-            replace_original: true,
-            text: text,
-          ).to_json
+          render_replacing_message(text)
         else
           render_error("you cannot cancel the request by other than the requester")
         end
+      end
+
+      def render_replacing_message(text)
+        Slack::Response.new(
+          response_type: "in_channel",
+          replace_original: true,
+          text: text,
+        ).to_json
       end
 
       def render_error(error)
@@ -61,8 +101,24 @@ module Banacle
         ).to_json
       end
 
-      def is_self_action?(payload)
-        payload[:user][:id] == payload[:original_message][:text].match(/\A<@([^>]+)>/)[1]
+      def self_actioned?
+        requester_id == actioner_id
+      end
+
+      def requester_id
+        original_message_text.match(/\A<@([^>]+)>/)[1]
+      end
+
+      def actioner_id
+        payload[:user][:id]
+      end
+
+      def original_message_text
+        payload[:original_message][:text]
+      end
+
+      def payload
+        @payload ||= JSON.parse(params["payload"], symbolize_names: true)
       end
     end
   end

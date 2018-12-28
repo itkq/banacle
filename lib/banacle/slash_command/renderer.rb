@@ -30,7 +30,7 @@ module Banacle
       end
 
       def render_list_vpc(command)
-        vpcs = aws.fetch_vpcs(command.region)
+        vpcs = command.execute
         text = "VPCs in #{command.region} are:\n"
         text += "```\n"
         text += vpcs.map { |name, id| "- #{id} (#{name})" }.join("\n")
@@ -68,12 +68,6 @@ module Banacle
             ),
           ],
         ).to_json
-      end
-
-      private
-
-      def aws
-        @aws = Aws.new
       end
     end
   end
