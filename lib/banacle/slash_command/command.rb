@@ -47,14 +47,7 @@ module Banacle
           cidr_blocks: cidr_blocks,
         )
 
-        results.map do |cidr_block, result|
-          t = "DENY #{cidr_block} => "
-          if result.status
-            t += "#{action} succeeded"
-          else
-            t += result.error.to_s
-          end
-        end.join("\n")
+        format_results(results)
       end
 
       def delete_nacl
@@ -64,6 +57,10 @@ module Banacle
           cidr_blocks: cidr_blocks,
         )
 
+        format_results(results)
+      end
+
+      def format_results(results)
         results.map do |cidr_block, result|
           t = "#{action} DENY #{cidr_block} => "
           if result.status
