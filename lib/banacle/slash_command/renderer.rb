@@ -6,27 +6,34 @@ module Banacle
   module SlashCommand
     class Renderer
       def self.render(params, command)
-        new.render(params, command)
+        new(params, command).render
+      end
+
+      def self.render_unauthenticated
+        render_error("you are not authorized to perform this command")
       end
 
       def self.render_error(error)
-        new.render_error(error)
-      end
-
-      def render(params, command)
-        render_approval_request(params, command)
-      end
-
-      def render_error(error)
         Slack::Response.new(
           response_type: "ephemeral",
           text: "An error occurred: #{error}",
         ).to_json
       end
 
-      def render_approval_request(params, command)
+      def initialize(params, command)
+        @params = params
+        @command = command
+      end
+
+      attr_reader :params, :command
+
+      def render
+        render_approval_request
+      end
+
+      def render_approval_request
         text = <<-EOS
-<@#{params["user_id"]}> wants to *#{command.action} NACL DENY entry* under the following conditions:
+<@#{user_id}> wants to *#{command.action} NACL DENY entry* under the following conditions:
 ```
 #{JSON.pretty_generate(command.to_h)}
 ```
@@ -50,6 +57,10 @@ module Banacle
             ),
           ],
         ).to_json
+      end
+
+      def user_id
+        params["user_id"]
       end
     end
   end

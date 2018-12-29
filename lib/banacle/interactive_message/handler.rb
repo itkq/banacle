@@ -6,8 +6,12 @@ module Banacle
   module InteractiveMessage
     class Handler < Banacle::Handler
       def handle_request
-        command = InteractiveMessage::Parser.parse(JSON.parse(request_payload))
-        InteractiveMessage::Renderer.render(request.params, command)
+        unless authenticated?
+          return Renderer.render_unauthenticated
+        end
+
+        command = Parser.parse(JSON.parse(request_payload))
+        Renderer.render(request.params, command)
       end
 
       private

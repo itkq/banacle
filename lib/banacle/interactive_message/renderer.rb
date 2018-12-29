@@ -8,6 +8,18 @@ module Banacle
         new(params, command).render
       end
 
+      def self.render_unauthenticated
+        self.render_error("you are not authorized to perform this action")
+      end
+
+      def self.render_error(error)
+        Slack::Response.new(
+          response_type: "ephemeral",
+          replace_original: false,
+          text: "An error occurred: #{error}",
+        ).to_json
+      end
+
       def initialize(params, command)
         @params = params
         @command = command
@@ -16,7 +28,6 @@ module Banacle
       attr_reader :params, :command
 
       def render
-        payload = JSON.parse(params["payload"], symbolize_names: true)
         action = Slack::Action.new(payload[:actions].first)
 
         if action.approved?
@@ -30,54 +41,39 @@ module Banacle
         end
       end
 
-      protected
-
-      # override
-      def authenticated_user?
-        true
-      end
-
       private
 
       def render_approved_message(payload, command)
         unless valid_approver?
-          return render_error("you cannot approve the request by yourself")
+          return self.render_error("you cannot approve the request by yourself")
         end
 
-        if authenticated_user?
-          result = command.execute
+        result = command.execute
 
-          text = original_message_text
-          text += ":white_check_mark: *<@#{actioner_id}> approved this request*\n"
-          text += "Result:\n"
-          text += "```\n"
-          text += result
-          text += "```"
+        text = original_message_text
+        text += ":white_check_mark: *<@#{actioner_id}> approved this request*\n"
+        text += "Result:\n"
+        text += "```\n"
+        text += result
+        text += "```"
 
-          render_replacing_message(text)
-        else
-          render_error("you are not permitted to approve the request")
-        end
+        render_replacing_message(text)
       end
 
       def render_rejected_message(payload, command)
         unless valid_rejector?
-          return render_error("you cannot reject the request by yourself")
+          return self.render_error("you cannot reject the request by yourself")
         end
 
-        if authenticated_user?
-          text = original_message_text
-          text += ":no_entry_sign: *<@#{actioner_id}> rejected this request*"
+        text = original_message_text
+        text += ":no_entry_sign: *<@#{actioner_id}> rejected this request*"
 
-          render_replacing_message(text)
-        else
-          render_error("you are not permitted to reject the request")
-        end
+        render_replacing_message(text)
       end
 
       def render_cancelled_message(payload, command)
         unless valid_canceller?
-          return render_error("you cannot cancel the request by other than the requester")
+          return self.render_error("you cannot cancel the request by other than the requester")
         end
 
         text = original_message_text
@@ -91,14 +87,6 @@ module Banacle
           response_type: "in_channel",
           replace_original: true,
           text: text,
-        ).to_json
-      end
-
-      def render_error(error)
-        Slack::Response.new(
-          response_type: "ephemeral",
-          replace_original: false,
-          text: "An error occurred: #{error}",
         ).to_json
       end
 

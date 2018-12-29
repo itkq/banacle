@@ -1,3 +1,4 @@
+require 'banacle/authenticator'
 require 'banacle/slack_validator'
 
 module Banacle
@@ -13,10 +14,6 @@ module Banacle
         return [401, {}, "invalid request"]
       end
 
-      if auth && !auth.authenticate(request)
-        return [402, {}, "unauthenticated"]
-      end
-
       handle_request
     end
 
@@ -24,8 +21,8 @@ module Banacle
     def handle_request
     end
 
-    def set_authenticator!
-      unless auth.is_a?(Banacle::Authentication)
+    def set_authenticator!(auth)
+      unless auth.is_a?(Banacle::Authenticator)
         raise InvalidAuthenticatorError.new(auth.inspect)
       end
 
@@ -33,6 +30,14 @@ module Banacle
     end
 
     private
+
+    def authenticated?
+      if auth && !auth.authenticate(request)
+        return false
+      end
+
+      true
+    end
 
     def skip_validation?
       request.params["skip_validation"] || ENV["BANACLE_SKIP_VALIDATION"]

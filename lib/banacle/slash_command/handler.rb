@@ -7,13 +7,17 @@ module Banacle
   module SlashCommand
     class Handler < Banacle::Handler
       def handle_request
-        begin
-          command = SlashCommand::Parser.parse(request_text)
-        rescue SlashCommand::Error => e
-          return SlashCommand::Renderer.render_error(e)
+        unless authenticated?
+          return Renderer.render_unauthenticated
         end
 
-        SlashCommand::Renderer.render(request.params, command)
+        begin
+          command = Parser.parse(request_text)
+        rescue Error => e
+          return Renderer.render_error(e)
+        end
+
+        Renderer.render(request.params, command)
       end
 
       private
