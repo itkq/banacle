@@ -27,26 +27,16 @@ module Banacle
 
       def build
         validate!
+        normalize_cidr_blocks!
 
-        if action == Command::LIST_VPC_ACTION
-          Command.new(action: action, region: region, vpc_id: nil, cidr_blocks: [])
-        else
-          Command.new(action: action, region: region, vpc_id: vpc_id, cidr_blocks: cidr_blocks)
-        end
+        Command.new(action: action, region: region, vpc_id: vpc_id, cidr_blocks: cidr_blocks)
       end
 
       def validate!
         validate_action!
         validate_region!
-        validate_vpc_id! if vpc_id
-        unless cidr_blocks.empty?
-          validate_cidr_blocks!
-          normalize_cidr_blocks!
-        end
-
-        if action == Command::CREATE_ACTION || action == Command::DELETE_ACTION
-          validate_critical_operation!
-        end
+        validate_vpc_id!
+        validate_cidr_blocks!
       end
 
       def validate_action!
@@ -72,6 +62,10 @@ module Banacle
       end
 
       def validate_vpc_id!
+        unless vpc_id
+          raise InvalidVpcError.new("vpc_id is required with #{action} action")
+        end
+
         vpcs = aws.fetch_vpcs(region)
         unless vpcs.values.include?(vpc_id)
           raise InvalidVpcError.new("vpc_id: #{vpc_id} not found")
@@ -79,6 +73,10 @@ module Banacle
       end
 
       def validate_cidr_blocks!
+        if !cidr_blocks || cidr_blocks.empty?
+          raise InvalidVpcError.new("at least one cidr_block is required with #{action} action")
+        end
+
         cidr_blocks.each do |cidr_block|
           begin
             IPAddr.new(cidr_block)
@@ -92,16 +90,6 @@ module Banacle
         cidr_blocks.map! do |c|
           ip = IPAddr.new(c)
           "#{ip}/#{ip.prefix}"
-        end
-      end
-
-      def validate_critical_operation!
-        unless vpc_id
-          raise InvalidVpcError.new("vpc_id is required with #{action} action")
-        end
-
-        if cidr_blocks.empty?
-          raise InvalidVpcError.new("at least one cidr_block is required with #{action} action")
         end
       end
 

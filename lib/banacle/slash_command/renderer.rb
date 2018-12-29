@@ -14,31 +14,13 @@ module Banacle
       end
 
       def render(params, command)
-        case command.action
-        when Command::LIST_VPC_ACTION
-          render_list_vpc(command)
-        else
-          render_approval_request(params, command)
-        end
+        render_approval_request(params, command)
       end
 
       def render_error(error)
         Slack::Response.new(
           response_type: "ephemeral",
           text: "An error occurred: #{error}",
-        ).to_json
-      end
-
-      def render_list_vpc(command)
-        vpcs = command.execute
-        text = "VPCs in #{command.region} are:\n"
-        text += "```\n"
-        text += vpcs.map { |name, id| "- #{id} (#{name})" }.join("\n")
-        text += "```"
-
-        Slack::Response.new(
-          response_type: "in_channel",
-          text: text,
         ).to_json
       end
 

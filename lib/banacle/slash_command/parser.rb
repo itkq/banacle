@@ -11,8 +11,6 @@ module Banacle
       end
 
       #
-      # /banacle listvpc [region]
-      #
       # /banacle (create|delete) [region] [vpc_id] [cidr_block1,cidr_block2,...]
       #
       def parse(text)

@@ -6,9 +6,8 @@ module Banacle
     class Command
       CREATE_ACTION = 'create'.freeze
       DELETE_ACTION = 'delete'.freeze
-      LIST_VPC_ACTION = 'listvpc'.freeze
 
-      PERMITTED_ACTIONS = [CREATE_ACTION, DELETE_ACTION, LIST_VPC_ACTION].freeze
+      PERMITTED_ACTIONS = [CREATE_ACTION, DELETE_ACTION].freeze
 
       def initialize(action:, region:, vpc_id:, cidr_blocks:)
         @action = action
@@ -25,8 +24,6 @@ module Banacle
           create_nacl
         when DELETE_ACTION
           delete_nacl
-        when LIST_VPC_ACTION
-          execute_list_vpc_action
         else
           # Do nothing
         end
@@ -93,14 +90,6 @@ module Banacle
             t += result.error.to_s
           end
         end.join("\n")
-      end
-
-      def execute_list_vpc_action
-        aws.fetch_vpcs(region)
-      end
-
-      def aws
-        @aws = Aws.new
       end
     end
   end
