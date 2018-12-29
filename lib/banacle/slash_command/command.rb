@@ -70,24 +70,6 @@ module Banacle
           end
         end.join("\n")
       end
-
-      def execute_nacl_operation
-        results = AwsWrapper::Nacl.create_network_acl_ingress_entries(
-          action: action,
-          region: region,
-          vpc_id: vpc_id,
-          cidr_blocks: cidr_blocks,
-        )
-
-        results.map do |cidr_block, result|
-          t = "#{cidr_block} => "
-          if result.status
-            t += "#{action} succeeded"
-          else
-            t += result.error.to_s
-          end
-        end.join("\n")
-      end
     end
   end
 end
