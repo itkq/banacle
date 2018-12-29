@@ -27,7 +27,11 @@ Banacle is supposed to be run as a Sinatra server. You can run it simply by `rac
 - `/slack/command`: handle Slash Command
 - `/slack/message`: handle Interactive Message
 
-### Example: ban 1.2.3.4 from my VPC
+### Customize authentication
+You can customize Banacle by using request handler modules.
+See example directory which implements a customized authentication feature for details.
+
+## Example: ban 1.2.3.4 from my VPC
 
 Execute an command that create a DENY NACL entry for 1.2.3.4 on a VPC named "test" in ap-northeast-1.
 
