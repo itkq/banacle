@@ -8,6 +8,8 @@ module Banacle
       class EntryDuplicatedError < AwsWrapper::Error; end
       class EntryNotFoundError < AwsWrapper::Error; end
 
+      DEFAULT_RULE_NUMBER = 100
+
       def self.create_network_acl_ingress_entries(region:, vpc_id:, cidr_blocks:)
         new(region, vpc_id, cidr_blocks).create_network_acl_ingress_entries
       end
@@ -69,7 +71,7 @@ module Banacle
             break
           end
         end
-        next_min_rule_number = 100 unless next_min_rule_number
+        next_min_rule_number = DEFAULT_RULE_NUMBER unless next_min_rule_number
 
         ec2.create_network_acl_entry(
           cidr_block: cidr_block,
