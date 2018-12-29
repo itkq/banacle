@@ -22,10 +22,11 @@ module Banacle
         @region = region
         @vpc_id = vpc_id
         @cidr_blocks = cidr_blocks
+        @rule_numbers = ingress_rules.map(&:rule_number).sort
       end
 
       attr_reader :action, :region, :vpc_id, :cidr_blocks
-      attr_accessor :current_rule_number
+      attr_accessor :rule_numbers
 
       def create_network_acl_ingress_entries
         cidr_blocks.map do |cidr_block|
@@ -54,8 +55,6 @@ module Banacle
       private
 
       def create_network_acl_ingress_entry(cidr_block)
-        ingress_rule_numbers = ingress_rules.map(&:rule_number)
-
         duplicated_rule = ingress_rules.select { |e|
           e.cidr_block == cidr_block
         }.first
@@ -65,9 +64,9 @@ module Banacle
         end
 
         next_min_rule_number = nil
-        (0..ingress_rule_numbers.size - 1).each do |i|
-          if ingress_rule_numbers[i + 1] - ingress_rule_numbers[i] > 1
-            next_min_rule_number = ingress_rule_numbers[i] + 1
+        (0..rule_numbers.size - 1).each do |i|
+          if rule_numbers[i + 1] - rule_numbers[i] > 1
+            next_min_rule_number = rule_numbers[i] + 1
             break
           end
         end
@@ -81,6 +80,8 @@ module Banacle
           rule_action: "deny",
           rule_number: next_min_rule_number,
         )
+
+        add_rule_number(next_min_rule_number)
       end
 
       def delete_network_acl_entry(cidr_block)
@@ -94,6 +95,12 @@ module Banacle
         else
           raise EntryDuplicatedError.new("not found")
         end
+      end
+
+      def add_rule_number(num)
+        rule_numbers << num
+        rule_numbers.sort!
+        num
       end
 
       def network_acl_id
