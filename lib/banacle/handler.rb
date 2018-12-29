@@ -32,11 +32,7 @@ module Banacle
     private
 
     def authenticated?
-      if auth && !auth.authenticate(request)
-        return false
-      end
-
-      true
+      !auth || auth.authenticate(request)
     end
 
     def skip_validation?
