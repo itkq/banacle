@@ -1,18 +1,38 @@
 module Banacle
   module Slack
     Response = Struct.new(:response_type, :replace_original, :text, :attachments, keyword_init: true) do
-      class ValidationFailed < StandardError; end
+      class ValidationError < StandardError; end
 
       def initialize(*args)
         super
-        self.replace_original = true if self.replace_original.nil?
-        self.attachments ||= []
+        self.set_default!
         self.validate!
         self
       end
 
+      def set_default!
+        self.response_type ||= "in_channel"
+        self.replace_original = true if self.replace_original.nil?
+        self.text ||= ""
+        self.attachments ||= []
+      end
+
       def validate!
-        # TODO
+        unless self.replace_original.is_a?(TrueClass) || self.replace_original.is_a?(FalseClass)
+          raise ValidationError.new("replace_original must be TrueClass or FalseClass")
+        end
+
+        %i(response_type text).each do |label|
+          unless self.send(label).is_a?(String)
+            raise ValidationError.new("#{attr} must be String")
+          end
+        end
+
+        attachments.each do |a|
+          unless a.is_a?(Slack::Attachment)
+            raise ValidationError.new("One of attachments #{a.inspect} must be Slack::Attachment")
+          end
+        end
       end
 
       def as_json
@@ -26,17 +46,36 @@ module Banacle
 
     Attachment = Struct.new(:text, :fallback, :callback_id, :color, \
                             :attachment_type, :actions, keyword_init: true) do
-      class ValidationFailed < StandardError; end
+      class ValidationError < StandardError; end
 
       def initialize(*args)
         super
-        self.actions ||= []
+        self.set_default!
         self.validate!
         self
       end
 
+      def set_default!
+        self.text ||= ''
+        self.fallback ||= ''
+        self.callback_id ||= ''
+        self.color ||= ''
+        self.attachment_type ||= ''
+        self.actions ||= []
+      end
+
       def validate!
-        # TODO
+        %i(text fallback callback_id color attachment_type).each do |label|
+          unless self.send(label).is_a?(String)
+            raise ValidationError.new("#{attr} must be String")
+          end
+        end
+
+        self.actions.each do |a|
+          unless a.is_a?(Slack::Action)
+            raise ValidationError.new("One of actions #{a.inspect} must be Slack::Action")
+          end
+        end
       end
 
       def as_json
@@ -45,7 +84,7 @@ module Banacle
     end
 
     Action = Struct.new(:name, :text, :style, :type, :value, keyword_init: true) do
-      class ValidationFailed < StandardError; end
+      class ValidationError < StandardError; end
 
       def self.approve_button
         self.build_button('approve', style: 'primary')
@@ -69,12 +108,25 @@ module Banacle
 
       def initialize(*args)
         super
+        self.set_default!
         self.validate!
         self
       end
 
+      def set_default!
+        self.name ||= ''
+        self.text ||= ''
+        self.style ||= ''
+        self.type ||= ''
+        self.value ||= ''
+      end
+
       def validate!
-        # TODO
+        %i(name text style type value).each do |label|
+          unless self.send(label).is_a?(String)
+            raise ValidationError.new("#{attr} must be String")
+          end
+        end
       end
 
       def approved?
