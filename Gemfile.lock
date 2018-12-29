@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    banacle (0.1.2)
+    banacle (0.2.0)
       aws-sdk-ec2
       sinatra
       unicorn
