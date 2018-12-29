@@ -83,11 +83,11 @@ module Banacle
       end
     end
 
-    Action = Struct.new(:name, :text, :style, :type, :value, keyword_init: true) do
+    Action = Struct.new(:name, :text, :style, :type, :value, :confirm, keyword_init: true) do
       class ValidationError < StandardError; end
 
       def self.approve_button
-        self.build_button('approve', style: 'primary')
+        self.build_button('approve', style: 'primary', confirm: Confirm.approve)
       end
 
       def self.reject_button
@@ -98,12 +98,12 @@ module Banacle
         self.build_button('cancel')
       end
 
-      def self.build_button(value, style: 'default')
-        self.build(value, style, 'button')
+      def self.build_button(value, style: 'default', confirm: nil)
+        self.build(value, style, 'button', confirm)
       end
 
-      def self.build(value, style, type)
-        self.new(name: value, text: value.capitalize, style: style, type: type, value: value)
+      def self.build(value, style, type, confirm)
+        self.new(name: value, text: value.capitalize, style: style, type: type, value: value, confirm: confirm)
       end
 
       def initialize(*args)
@@ -127,6 +127,10 @@ module Banacle
             raise ValidationError.new("#{attr} must be String")
           end
         end
+
+        if self.confirm && !self.confirm.is_a?(Confirm)
+          raise ValidationError.new("confirm must be Slack::Confirm")
+        end
       end
 
       def approved?
@@ -139,6 +143,44 @@ module Banacle
 
       def cancelled?
         self.value == 'cancel'
+      end
+
+      def as_json
+        self.to_h.tap do |h|
+          if h[:confirm]
+            h[:confirm] = h[:confirm].as_json
+          else
+            h.delete(:confirm)
+          end
+        end
+      end
+    end
+
+    Confirm = Struct.new(:title, :text, :ok_text, :dismiss_text, keyword_init: true) do
+      def self.approve
+        self.new(text: 'The operation will be performed immediately.')
+      end
+
+      def initialize(*args)
+        super
+        self.set_default!
+        self.validate!
+        self
+      end
+
+      def set_default!
+        self.title ||= 'Are you sure?'
+        self.text ||= ''
+        self.ok_text ||= 'Yes'
+        self.dismiss_text ||= 'No'
+      end
+
+      def validate!
+        %i(title text ok_text dismiss_text).each do |label|
+          unless self.send(label).is_a?(String)
+            raise ValidationError.new("#{attr} must be String")
+          end
+        end
       end
 
       def as_json
