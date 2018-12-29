@@ -24,18 +24,18 @@ module Banacle
     def handle_request
     end
 
-    private
-
-    def skip_validation?
-      request.params["skip_validation"] || ENV["BANACLE_SKIP_VALIDATION"]
-    end
-
     def set_authenticator!
       unless auth.is_a?(Banacle::Authentication)
         raise InvalidAuthenticatorError.new(auth.inspect)
       end
 
       @auth = auth
+    end
+
+    private
+
+    def skip_validation?
+      request.params["skip_validation"] || ENV["BANACLE_SKIP_VALIDATION"]
     end
   end
 end
