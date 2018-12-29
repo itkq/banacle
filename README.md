@@ -1,8 +1,4 @@
-# Banacle
-
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/banacle`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+# Banacle: Create or delete DENY NACL entries on AWS VPC as ChatOps (Slack Slash Command)
 
 ## Installation
 
@@ -14,15 +10,37 @@ gem 'banacle'
 
 And then execute:
 
-    $ bundle
+```
+$ bundle
+```
 
 Or install it yourself as:
 
-    $ gem install banacle
+```
+$ gem install banacle
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+Banacle is supposed to be run as a Sinatra server. You can run it simply by `rackup` command. Banacle has two endpoints for Slack as follows:
+
+- `/slack/command`: handle Slash Command
+- `/slack/message`: handle Interactive Message
+
+### Example: ban 1.2.3.4 from my VPC
+
+Execute an command that create a DENY NACL entry for 1.2.3.4 on a VPC named "test" in ap-northeast-1.
+
+![](./docs/demo1.png)
+
+Then an approval request appears. Someone else can review the request and decide to approve or reject it. The requester can cancel the request. In this case, the request looks good so the reviewer clicks "Approve" button.
+
+![](./docs/demo2.png)
+
+After approving the request, Banacle executes creating the NACL entry on the target VPC through the AWS API as follows.
+
+![](./docs/nacl.png)
+
 
 ## Development
 
@@ -32,4 +50,4 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/banacle.
+Bug reports and pull requests are welcome on GitHub at https://github.com/itkq/banacle.

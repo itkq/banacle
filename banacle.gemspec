@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Takuya Kosugiyama"]
   spec.email         = ["re@itkq.jp"]
 
-  spec.summary       = %q{Operate your NACL through Slack slash command.}
-  spec.description   = %q{Operate your NACL through Slack slash command.}
+  spec.summary       = %q{Create or delete DENY NACL entries on AWS VPC as ChatOps (Slack Slash Command)}
+  spec.description   = %q{Create or delete DENY NACL entries on AWS VPC as ChatOps (Slack Slash Command)}
   spec.homepage      = "https://github.com/itkq/banacle"
 
   # Specify which files should be added to the gem when it is released.
