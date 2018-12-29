@@ -49,7 +49,6 @@ class CommandAuthenticator < Banacle::Authenticator
 end
 
 class MessageAuthenticator < Banacle::Authenticator
-  attr_reader :request
   def authenticate(request)
     payload = JSON.parse(request.params["payload"])
     # team_id = payload["team"]["id"]
