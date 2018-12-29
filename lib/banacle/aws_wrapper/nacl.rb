@@ -93,7 +93,7 @@ module Banacle
             rule_number: target.rule_number,
           )
         else
-          raise EntryDuplicatedError.new("not found")
+          raise EntryNotFoundError.new("not found")
         end
       end
 
