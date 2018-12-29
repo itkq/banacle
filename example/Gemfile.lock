@@ -1,0 +1,53 @@
+PATH
+  remote: ..
+  specs:
+    banacle (0.1.2)
+      aws-sdk-ec2
+      sinatra
+      unicorn
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    aws-eventstream (1.0.1)
+    aws-partitions (1.127.0)
+    aws-sdk-core (3.44.1)
+      aws-eventstream (~> 1.0)
+      aws-partitions (~> 1.0)
+      aws-sigv4 (~> 1.0)
+      jmespath (~> 1.0)
+    aws-sdk-ec2 (1.65.0)
+      aws-sdk-core (~> 3, >= 3.39.0)
+      aws-sigv4 (~> 1.0)
+    aws-sigv4 (1.0.3)
+    coderay (1.1.2)
+    jmespath (1.4.0)
+    kgio (2.11.2)
+    method_source (0.9.2)
+    mustermann (1.0.3)
+    pry (0.12.2)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
+    rack (2.0.6)
+    rack-protection (2.0.5)
+      rack
+    raindrops (0.19.0)
+    sinatra (2.0.5)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.5)
+      tilt (~> 2.0)
+    tilt (2.0.9)
+    unicorn (5.4.1)
+      kgio (~> 2.6)
+      raindrops (~> 0.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  banacle!
+  pry
+
+BUNDLED WITH
+   1.16.2
