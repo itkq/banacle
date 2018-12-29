@@ -24,7 +24,7 @@ module Banacle
     attr_reader :request
 
     def handle_slash_command
-      unless skip_slack_validation? || SlackValidator.valid_signature?(request)
+      unless skip_validation? || SlackValidator.valid_signature?(request)
         return [401, {}, "invalid request"]
       end
 
@@ -38,7 +38,7 @@ module Banacle
     end
 
     def handle_interactive_message
-      unless skip_slack_validation? || SlackValidator.valid_signature?(request)
+      unless skip_validation? || SlackValidator.valid_signature?(request)
         return [401, {}, "invalid request"]
       end
 
@@ -54,9 +54,8 @@ module Banacle
       request.params["payload"]
     end
 
-    # for debug
-    def skip_slack_validation?
-      request.params["skip_validation"]
+    def skip_validation?
+      request.params["skip_validation"] || ENV["BANACLE_SKIP_VALIDATION"]
     end
   end
 end

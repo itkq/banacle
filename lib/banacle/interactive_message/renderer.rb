@@ -40,7 +40,7 @@ module Banacle
       private
 
       def render_approved_message(payload, command)
-        if self_actioned?
+        unless valid_approver?
           return render_error("you cannot approve the request by yourself")
         end
 
@@ -60,7 +60,7 @@ module Banacle
       end
 
       def render_rejected_message(payload, command)
-        if self_actioned?
+        unless valid_rejector?
           return render_error("you cannot reject the request by yourself")
         end
 
@@ -75,14 +75,14 @@ module Banacle
       end
 
       def render_cancelled_message(payload, command)
-        if self_actioned?
-          text = original_message_text
-          text += "\nThe request was cancelled."
-
-          render_replacing_message(text)
-        else
-          render_error("you cannot cancel the request by other than the requester")
+        unless valid_canceller?
+          return render_error("you cannot cancel the request by other than the requester")
         end
+
+        text = original_message_text
+        text += "\nThe request was cancelled."
+
+        render_replacing_message(text)
       end
 
       def render_replacing_message(text)
@@ -99,6 +99,18 @@ module Banacle
           replace_original: false,
           text: "An error occurred: #{error}",
         ).to_json
+      end
+
+      def valid_approver?
+        ENV['BANACLE_SKIP_VALIDATION'] || !self_actioned?
+      end
+
+      def valid_rejector?
+        ENV['BANACLE_SKIP_VALIDATION'] || !self_actioned?
+      end
+
+      def valid_canceller?
+        ENV['BANACLE_SKIP_VALIDATION'] || self_actioned?
       end
 
       def self_actioned?
