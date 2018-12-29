@@ -48,6 +48,7 @@ module Banacle
           result = command.execute
 
           text = original_message_text
+          text += ":white_check_mark: *<@#{actioner_id}> approved this request*\n"
           text += "Result:\n"
           text += "```\n"
           text += result
@@ -66,7 +67,7 @@ module Banacle
 
         if authenticated_user?
           text = original_message_text
-          text += "\nThe request was rejected by <@#{actioner_id}>."
+          text += ":no_entry_sign: *<@#{actioner_id}> rejected this request*"
 
           render_replacing_message(text)
         else
