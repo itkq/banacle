@@ -10,12 +10,12 @@ module Banacle
 
     post '/slack/command' do
       content_type :json
-      Handler.new.handle_slash_command(request)
+      Handler.handle_slash_command(request)
     end
 
     post '/slack/message' do
       content_type :json
-      Handler.new.handle_interactive_message(request)
+      Handler.handle_interactive_message(request)
     end
   end
 end
