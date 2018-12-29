@@ -11,11 +11,11 @@ module Banacle
       end
 
       #
-      # /banacle (create|delete) [region] [vpc_id] [cidr_block1,cidr_block2,...]
+      # /banacle (create|delete) [region] [vpc_id or vpc_name] [cidr_block1,cidr_block2,...]
       #
       def parse(text)
         elems = text.split(" ")
-        action, region, vpc_id, cidr_blocks_str = elems
+        action, region, vpc_id_or_name, cidr_blocks_str = elems
 
         unless action
           raise ParseError.new("action is required")
@@ -33,7 +33,7 @@ module Banacle
         SlashCommand::Builder.build(
           action: action,
           region: region,
-          vpc_id: vpc_id,
+          vpc_id_or_name: vpc_id_or_name,
           cidr_blocks: cidr_blocks,
         )
       end

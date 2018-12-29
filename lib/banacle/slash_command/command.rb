@@ -1,5 +1,5 @@
-require 'banacle/aws'
 require 'banacle/aws_wrapper/nacl'
+require 'banacle/aws_wrapper/vpc'
 
 module Banacle
   module SlashCommand

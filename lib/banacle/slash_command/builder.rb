@@ -1,6 +1,6 @@
 require 'ipaddr'
 
-require 'banacle/aws'
+require 'banacle/aws_wrapper/vpc'
 require 'banacle/slash_command/error'
 require 'banacle/slash_command/command'
 
@@ -12,21 +12,23 @@ module Banacle
       class InvalidVpcError < Error; end
       class InvalidCidrBlockError < Error; end
 
-      def self.build(action:, region:, vpc_id:, cidr_blocks:)
-        new(action: action, region: region, vpc_id: vpc_id, cidr_blocks: cidr_blocks).build
+      def self.build(action:, region:, vpc_id_or_name:, cidr_blocks:)
+        new(action: action, region: region, vpc_id_or_name: vpc_id_or_name, cidr_blocks: cidr_blocks).build
       end
 
-      def initialize(action:, region:, vpc_id:, cidr_blocks:)
+      def initialize(action:, region:, vpc_id_or_name:, cidr_blocks:)
         @action = action
         @region = region
-        @vpc_id = vpc_id
+        @vpc_id_or_name = vpc_id_or_name
         @cidr_blocks = cidr_blocks
       end
 
-      attr_reader :action, :region, :vpc_id, :cidr_blocks
+      attr_reader :action, :region, :vpc_id_or_name, :cidr_blocks
+      attr_accessor :vpc_id
 
       def build
         validate!
+        set_vpc_id!
         normalize_cidr_blocks!
 
         Command.new(action: action, region: region, vpc_id: vpc_id, cidr_blocks: cidr_blocks)
@@ -35,7 +37,7 @@ module Banacle
       def validate!
         validate_action!
         validate_region!
-        validate_vpc_id!
+        validate_vpc_id_or_name!
         validate_cidr_blocks!
       end
 
@@ -53,22 +55,11 @@ module Banacle
         if !region || region.empty?
           raise InvalidRegionError.new("region is required")
         end
-
-        # TODO: remove aws dependency
-        regions = aws.fetch_regions
-        unless regions.include?(region)
-          raise InvalidRegionError.new("avaliable regions are: (#{regions.join("|")})")
-        end
       end
 
-      def validate_vpc_id!
-        unless vpc_id
-          raise InvalidVpcError.new("vpc_id is required with #{action} action")
-        end
-
-        vpcs = aws.fetch_vpcs(region)
-        unless vpcs.values.include?(vpc_id)
-          raise InvalidVpcError.new("vpc_id: #{vpc_id} not found")
+      def validate_vpc_id_or_name!
+        unless vpc_id_or_name
+          raise InvalidVpcError.new("vpc_id or vpc_name is required with #{action} action")
         end
       end
 
@@ -86,15 +77,23 @@ module Banacle
         end
       end
 
+      def set_vpc_id!
+        begin
+          self.vpc_id = AwsWrapper::Vpc.resolve_vpc_id(region, vpc_id_or_name)
+        rescue AwsWrapper::Vpc::InvalidRegionError
+          raise InvalidRegionError.new("specified region: #{region} is invalid")
+        end
+
+        unless vpc_id
+          raise InvalidVpcError.new("specified vpc: #{vpc_id_or_name} in #{region} not found")
+        end
+      end
+
       def normalize_cidr_blocks!
         cidr_blocks.map! do |c|
           ip = IPAddr.new(c)
           "#{ip}/#{ip.prefix}"
         end
-      end
-
-      def aws
-        @aws = Aws.new
       end
     end
   end
