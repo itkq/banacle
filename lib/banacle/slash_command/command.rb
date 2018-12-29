@@ -65,11 +65,11 @@ module Banacle
         )
 
         results.map do |cidr_block, result|
-          t = "DENY #{cidr_block} => "
+          t = "#{action} DENY #{cidr_block} => "
           if result.status
-            t += "#{action} succeeded"
+            t += "succeeded"
           else
-            t += result.error.to_s
+            t += "error: #{result.error}"
           end
         end.join("\n")
       end
