@@ -1,4 +1,5 @@
 require 'banacle/handler'
+require 'banacle/interactive_message/request'
 require 'banacle/interactive_message/parser'
 require 'banacle/interactive_message/renderer'
 
@@ -10,14 +11,9 @@ module Banacle
           return Renderer.render_unauthenticated
         end
 
-        command = Parser.parse(JSON.parse(request_payload))
-        Renderer.render(request.params, command, config)
-      end
-
-      private
-
-      def request_payload
-        request.params["payload"]
+        request = Request.new(@request)
+        command = Parser.parse(request.payload)
+        Renderer.render(request, command, config)
       end
     end
   end

@@ -1,12 +1,10 @@
 require 'banacle/slack'
-require 'banacle/slash_command/builder'
-require 'banacle/slash_command/command'
 
 module Banacle
   module SlashCommand
     class Renderer
-      def self.render(params, command, config)
-        new(params, command, config).render
+      def self.render(request, command, config)
+        new(request, command, config).render
       end
 
       def self.render_unauthenticated
@@ -20,13 +18,13 @@ module Banacle
         ).to_json
       end
 
-      def initialize(params, command, config)
-        @params = params
+      def initialize(request, command, config)
+        @request = request
         @command = command
         @config = config
       end
 
-      attr_reader :params, :command, :config
+      attr_reader :request, :command, :config
 
       def render
         render_approval_request
@@ -61,7 +59,7 @@ module Banacle
       end
 
       def user_id
-        params["user_id"]
+        request.user_id
       end
     end
   end

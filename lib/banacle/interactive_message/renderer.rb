@@ -1,11 +1,10 @@
 require 'banacle/slack'
-require 'banacle/slash_command/command'
 
 module Banacle
   module InteractiveMessage
     class Renderer
-      def self.render(params, command, config)
-        new(params, command, config).render
+      def self.render(request, command, config)
+        new(request, command, config).render
       end
 
       def self.render_unauthenticated
@@ -20,23 +19,23 @@ module Banacle
         ).to_json
       end
 
-      def initialize(params, command, config)
-        @params = params
+      def initialize(request, command, config)
+        @request = request
         @command = command
         @config = config
       end
 
-      attr_reader :params, :command
+      attr_reader :request, :command # TODO
 
       def render
-        action = Slack::Action.new(payload[:actions].first)
+        action = Slack::Action.new(request.action)
 
         if action.approved?
-          render_approved_message(payload, command)
+          render_approved_message
         elsif action.rejected?
-          render_rejected_message(payload, command)
+          render_rejected_message
         elsif action.cancelled?
-          render_cancelled_message(payload, command)
+          render_cancelled_message
         else
           # Do nothing
         end
@@ -44,7 +43,7 @@ module Banacle
 
       private
 
-      def render_approved_message(payload, command)
+      def render_approved_message
         unless valid_approver?
           return self.render_error("you cannot approve the request by yourself")
         end
@@ -61,7 +60,7 @@ module Banacle
         render_replacing_message(text)
       end
 
-      def render_rejected_message(payload, command)
+      def render_rejected_message
         unless valid_rejector?
           return self.render_error("you cannot reject the request by yourself")
         end
@@ -72,7 +71,7 @@ module Banacle
         render_replacing_message(text)
       end
 
-      def render_cancelled_message(payload, command)
+      def render_cancelled_message
         unless valid_canceller?
           return self.render_error("you cannot cancel the request by other than the requester")
         end
@@ -104,23 +103,15 @@ module Banacle
       end
 
       def self_actioned?
-        requester_id == actioner_id
-      end
-
-      def requester_id
-        original_message_text.match(/\A<@([^>]+)>/)[1]
-      end
-
-      def actioner_id
-        payload[:user][:id]
+        request.self_actioned?
       end
 
       def original_message_text
-        payload[:original_message][:text]
+        request.original_message_text
       end
 
-      def payload
-        @payload ||= JSON.parse(params["payload"], symbolize_names: true)
+      def actioner_id
+        request.actioner_id
       end
     end
   end
