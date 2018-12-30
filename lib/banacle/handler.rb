@@ -5,7 +5,11 @@ module Banacle
   class Handler
     class InvalidAuthenticatorError < StandardError; end
 
-    attr_reader :request, :auth
+    def initialize(config)
+      @config = config
+    end
+
+    attr_reader :config, :request, :auth
 
     def handle(request)
       @request = request

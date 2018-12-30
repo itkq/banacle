@@ -1,7 +1,10 @@
 require 'sinatra/base'
+require 'banacle/app'
 require 'banacle/authenticator'
 require 'banacle/slash_command/handler'
 require 'banacle/interactive_message/handler'
+
+require File.join(__dir__, 'config')
 
 class App < Sinatra::Base
   include Banacle
@@ -58,4 +61,4 @@ class MessageAuthenticator < Banacle::Authenticator
   end
 end
 
-run App
+run Banacle.app(Banacle.config)

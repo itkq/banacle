@@ -5,8 +5,8 @@ require 'banacle/slash_command/command'
 module Banacle
   module SlashCommand
     class Renderer
-      def self.render(params, command)
-        new(params, command).render
+      def self.render(params, command, config)
+        new(params, command, config).render
       end
 
       def self.render_unauthenticated
@@ -20,12 +20,13 @@ module Banacle
         ).to_json
       end
 
-      def initialize(params, command)
+      def initialize(params, command, config)
         @params = params
         @command = command
+        @config = config
       end
 
-      attr_reader :params, :command
+      attr_reader :params, :command, :config
 
       def render
         render_approval_request
@@ -44,7 +45,7 @@ module Banacle
           text: text,
           attachments: [
             Slack::Attachment.new(
-              text: "*Approval Request*",
+              text: config.dig(:approval_request, :attachment, :text) || "*Approval Request*",
               fallback: "TBD",
               callback_id: "banacle_approval_request",
               color: "#3AA3E3",

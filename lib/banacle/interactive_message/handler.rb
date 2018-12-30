@@ -11,7 +11,7 @@ module Banacle
         end
 
         command = Parser.parse(JSON.parse(request_payload))
-        Renderer.render(request.params, command)
+        Renderer.render(request.params, command, config)
       end
 
       private

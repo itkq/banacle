@@ -17,7 +17,7 @@ module Banacle
           return Renderer.render_error(e)
         end
 
-        Renderer.render(request.params, command)
+        Renderer.render(request.params, command, config)
       end
 
       private

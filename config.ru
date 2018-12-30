@@ -1,3 +1,3 @@
 require 'banacle'
 
-run Banacle::App
+run Banacle.app
