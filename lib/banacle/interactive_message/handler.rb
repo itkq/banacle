@@ -85,7 +85,7 @@ module Banacle
       end
 
       def auth
-        (config.dig(:interactive_message, :authenticator) || Authenticator).new
+        config.dig(:interactive_message, :authenticator) || Authenticator.new
       end
     end
   end

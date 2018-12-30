@@ -14,7 +14,7 @@ end
 config = Banacle::Config.new(
   slack_signing_secret: ENV.fetch('BANACLE_SLACK_SIGNING_SECRET'),
   slash_command: {
-    authenticator: CommandAuthenticator,
+    authenticator: CommandAuthenticator.new,
   },
   approval_request: {
     attachment: {

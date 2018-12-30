@@ -42,7 +42,7 @@ module Banacle
       end
 
       def auth
-        (config.dig(:slash_command, :authenticator) || Authenticator).new
+        config.dig(:slash_command, :authenticator) || Authenticator.new
       end
     end
   end
