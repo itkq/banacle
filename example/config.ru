@@ -6,7 +6,7 @@ class CommandAuthenticator < Banacle::SlashCommand::Authenticator
   def authenticate_requester!(request)
     super
     if request.user_id != "U0XXXXXXX"
-      raise NotAuthenticatedError.new("You are not authorized to perform this command")
+      raise NotAuthenticatedError.new("you are not authorized to perform this command")
     end
   end
 end
