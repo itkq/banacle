@@ -5,9 +5,11 @@ module Banacle
   class SlackValidator
     SLACK_SIGNING_SECRET_VERSION = 'v0'.freeze
 
-    def self.valid_signature?(request)
-      new.valid_signature?(request)
+    def initialize(signing_secret)
+      @signing_secret = signing_secret
     end
+
+    attr_reader :signing_secret
 
     def valid_signature?(request)
       body = request.env["rack.request.form_vars"]
@@ -23,10 +25,6 @@ module Banacle
       digest = OpenSSL::HMAC.hexdigest("SHA256", signing_secret, sig_basestring)
 
       slack_signature == "#{SLACK_SIGNING_SECRET_VERSION}=#{digest}"
-    end
-
-    def signing_secret
-      ENV.fetch('BANACLE_SLACK_SIGNING_SECRET')
     end
   end
 end

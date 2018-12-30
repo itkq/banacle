@@ -3,14 +3,6 @@ require 'banacle/slack'
 module Banacle
   module SlashCommand
     class Renderer
-      def self.render(request, command, config)
-        new(request, command, config).render
-      end
-
-      def self.render_unauthenticated
-        render_error("you are not authorized to perform this command")
-      end
-
       def self.render_error(error)
         Slack::Response.new(
           response_type: "ephemeral",
@@ -25,10 +17,6 @@ module Banacle
       end
 
       attr_reader :request, :command, :config
-
-      def render
-        render_approval_request
-      end
 
       def render_approval_request
         text = <<-EOS

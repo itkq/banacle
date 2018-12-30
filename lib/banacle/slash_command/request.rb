@@ -8,11 +8,15 @@ module Banacle
       attr_reader :request
 
       def user_id
-        request.params["user_id"]
+        params["user_id"]
       end
 
       def text
-        request.params["text"]
+        params["text"]
+      end
+
+      def params
+        request.params
       end
     end
   end

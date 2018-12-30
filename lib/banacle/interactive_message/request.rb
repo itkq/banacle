@@ -9,6 +9,14 @@ module Banacle
 
       attr_reader :request
 
+      def action
+        Slack::Action.new(payload["actions"].first)
+      end
+
+      def self_actioned?
+        requester_id == actioner_id
+      end
+
       def requester_id
         original_message_text.match(REQUESTER_ID_REGEX)[1]
       end
@@ -19,10 +27,6 @@ module Banacle
 
       def original_message_text
         payload["original_message"]["text"]
-      end
-
-      def action
-        payload["actions"].first
       end
 
       def payload

@@ -1,5 +1,4 @@
 require 'sinatra/base'
-require 'banacle/config'
 require 'banacle/slash_command/handler'
 require 'banacle/interactive_message/handler'
 
@@ -41,7 +40,10 @@ module Banacle
       end
 
       def message_handler
-        @message_handler ||= InteractiveMessage::Handler.new(config)
+        @message_handler ||= InteractiveMessage::Handler.new(
+          config,
+          auth: InteractiveMessage::Authenticator.new,
+        )
       end
     end
 
