@@ -27,6 +27,8 @@ Banacle is supposed to be run as a Sinatra server. You can run it simply by `rac
 - `/slack/command`: handle Slash Command
 - `/slack/message`: handle Interactive Message
 
+By default, the format of Slack Slash Command is: `/[cmd] [create or delete] [region] [vpc_id or vpc_name] [cidr_blocks]`
+
 ### Customize authentication
 You can customize Banacle by using request handler modules.
 See example directory which implements a customized authentication feature for details.
