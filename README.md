@@ -35,7 +35,7 @@ See example directory which implements a customized authentication feature for d
 
 ## Example: ban 1.2.3.4 from my VPC
 
-Execute an command that create a DENY NACL entry for 1.2.3.4 on a VPC named "test" in ap-northeast-1.
+Execute a command that create a DENY NACL entry for 1.2.3.4 on a VPC named "test" in ap-northeast-1.
 
 ![](./docs/demo1.png)
 
