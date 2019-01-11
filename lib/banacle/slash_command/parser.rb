@@ -15,6 +15,11 @@ module Banacle
       #
       def parse(text)
         elems = text.split(" ")
+
+        if elems.size > 4
+          raise ParseError.new("too many arguments")
+        end
+
         action, region, vpc_id_or_name, cidr_blocks_str = elems
 
         unless action
