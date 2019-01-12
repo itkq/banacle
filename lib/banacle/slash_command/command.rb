@@ -56,10 +56,6 @@ module Banacle
 
       private
 
-      def command_json_regex
-        /```([^`]+)```/.freeze
-      end
-
       def create_nacl
         results = AwsWrapper::Nacl.create_network_acl_ingress_entries(
           region: region,
