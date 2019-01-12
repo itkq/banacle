@@ -1,6 +1,5 @@
 require 'aws-sdk-ec2'
 require 'banacle/aws_wrapper/error'
-require 'banacle/aws_wrapper/result'
 
 module Banacle
   module AwsWrapper

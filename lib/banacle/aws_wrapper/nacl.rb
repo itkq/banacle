@@ -1,12 +1,13 @@
 require 'aws-sdk-ec2'
 require 'banacle/aws_wrapper/error'
-require 'banacle/aws_wrapper/result'
 
 module Banacle
   module AwsWrapper
     class Nacl
       class EntryDuplicatedError < AwsWrapper::Error; end
       class EntryNotFoundError < AwsWrapper::Error; end
+
+      Result = Struct.new(:cidr_block, :status, :error, :rule_number, keyword_init: true) do; end
 
       DEFAULT_RULE_NUMBER = 100
 
@@ -30,26 +31,24 @@ module Banacle
 
       def create_network_acl_ingress_entries
         cidr_blocks.map do |cidr_block|
-          result = begin
-                     create_network_acl_ingress_entry(cidr_block)
-                     AwsWrapper::Result.new(status: true)
-                   rescue AwsWrapper::Error => e
-                     AwsWrapper::Result.new(status: false, error: e)
-                   end
-          [cidr_block, result]
-        end.to_h
+          begin
+            rule_number = create_network_acl_ingress_entry(cidr_block)
+            Result.new(cidr_block: cidr_block, status: true, rule_number: rule_number)
+          rescue AwsWrapper::Error => e
+            Result.new(cidr_block: cidr_block, status: false, error: e)
+          end
+        end
       end
 
       def delete_network_acl_entries
         cidr_blocks.map do |cidr_block|
-          result = begin
-                     delete_network_acl_entry(cidr_block)
-                     AwsWrapper::Result.new(status: true)
-                   rescue AwsWrapper::Error => e
-                     AwsWrapper::Result.new(status: false, error: e)
-                   end
-          [cidr_block, result]
-        end.to_h
+          begin
+            rule_number = delete_network_acl_entry(cidr_block)
+            Result.new(cidr_block: cidr_block, status: true, rule_number: rule_number)
+          rescue AwsWrapper::Error => e
+            Result.new(cidr_block: cidr_block, status: false, error: e)
+          end
+        end
       end
 
       private
@@ -95,6 +94,8 @@ module Banacle
         else
           raise EntryNotFoundError.new("not found")
         end
+
+        target.rule_number
       end
 
       def add_rule_number(num)

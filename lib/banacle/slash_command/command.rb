@@ -61,10 +61,10 @@ module Banacle
       end
 
       def format_results(results)
-        results.map do |cidr_block, result|
-          t = "#{action} DENY #{cidr_block} => "
+        results.map do |result|
+          t = "#{action} DENY #{result.cidr_block} => "
           if result.status
-            t += "succeeded"
+            t += "succeeded (rule number: #{result.rule_number})"
           else
             t += "error: #{result.error}"
           end
