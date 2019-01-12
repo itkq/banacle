@@ -1,4 +1,4 @@
-# Banacle: Create or delete DENY NACL entries on AWS VPC as ChatOps (Slack Slash Command)
+# Banacle: Create or delete DENY NACL ingress entries on AWS VPC as ChatOps (Slack Slash Command)
 
 ## Installation
 
@@ -35,7 +35,7 @@ See example directory which implements a customized authentication feature for d
 
 ## Example: ban 1.2.3.4 from my VPC
 
-Execute a command that create a DENY NACL entry for 1.2.3.4 on a VPC named "test" in ap-northeast-1.
+Execute a command that create a DENY NACL ingress entry for 1.2.3.4 on a VPC named "test" in ap-northeast-1.
 
 ![](./docs/demo1.png)
 
