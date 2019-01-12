@@ -8,16 +8,8 @@ module Banacle
       end
 
       def parse(payload)
-        original_text = payload["original_message"]["text"]
-        original_json = JSON.parse(
-          original_text.match(command_json_regex)[1].strip, symbolize_names: true,
-        )
-        command = SlashCommand::Command.new(**original_json)
-      end
-
-      # TODO: sync slash_command/renderer
-      def command_json_regex
-        /```([^`]+)```/.freeze
+        original_message = payload["original_message"]["text"]
+        SlashCommand::Command.new_from_original_message(original_message)
       end
     end
   end

@@ -6,8 +6,16 @@ module Banacle
     class Command
       CREATE_ACTION = 'create'.freeze
       DELETE_ACTION = 'delete'.freeze
-
       PERMITTED_ACTIONS = [CREATE_ACTION, DELETE_ACTION].freeze
+
+      CODE_BLOCK_JSON_REGEX = /```([^`]+)```/.freeze
+
+      def self.new_from_original_message(message)
+        original_json = JSON.parse(
+          message.match(CODE_BLOCK_JSON_REGEX)[1].strip, symbolize_names: true,
+        )
+        new(**original_json)
+      end
 
       def initialize(action:, region:, vpc_id:, cidr_blocks:)
         @action = action
@@ -29,6 +37,14 @@ module Banacle
         end
       end
 
+      def to_code_block
+        <<-EOS
+```
+#{JSON.pretty_generate(self.to_h)}
+```
+        EOS
+      end
+
       def to_h
         {
           action: action,
@@ -39,6 +55,10 @@ module Banacle
       end
 
       private
+
+      def command_json_regex
+        /```([^`]+)```/.freeze
+      end
 
       def create_nacl
         results = AwsWrapper::Nacl.create_network_acl_ingress_entries(

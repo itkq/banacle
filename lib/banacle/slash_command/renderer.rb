@@ -21,9 +21,7 @@ module Banacle
       def render_approval_request
         text = <<-EOS
 <@#{user_id}> wants to *#{command.action} NACL DENY entry* under the following conditions:
-```
-#{JSON.pretty_generate(command.to_h)}
-```
+#{command.to_code_block}
         EOS
 
         Slack::Response.new(
