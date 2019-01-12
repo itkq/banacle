@@ -22,13 +22,16 @@ module Banacle
 
         self.request = Request.new(raw_request)
 
-        if request.action.approved?
-          handle_approval
-        elsif request.action.rejected?
-          handle_reject
-        elsif request.action.cancelled?
-          handle_cancellation
-        end
+        json = if request.action.approved?
+                 handle_approval
+               elsif request.action.rejected?
+                 handle_reject
+               elsif request.action.cancelled?
+                 handle_cancellation
+               end
+        puts json
+
+        json
       end
 
       private

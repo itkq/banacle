@@ -28,7 +28,10 @@ module Banacle
           return Renderer.render_error(e)
         end
 
-        Renderer.new(request, command, config).render_approval_request
+        json = Renderer.new(request, command, config).render_approval_request
+        puts json
+
+        json
       end
 
       private
