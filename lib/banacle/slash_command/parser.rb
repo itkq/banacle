@@ -10,9 +10,10 @@ module Banacle
         new.parse(text)
       end
 
-      #
-      # /banacle (create|delete) [region] [vpc_id or vpc_name] [cidr_block1,cidr_block2,...]
-      #
+      def self.help
+        '(create|delete) [region] [vpc_id or vpc_name] [cidr_block1,cidr_block2,...]'
+      end
+
       def parse(text)
         elems = text.split(" ")
 
