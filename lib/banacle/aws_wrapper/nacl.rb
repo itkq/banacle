@@ -34,7 +34,7 @@ module Banacle
           begin
             rule_number = create_network_acl_ingress_entry(cidr_block)
             Result.new(cidr_block: cidr_block, status: true, rule_number: rule_number)
-          rescue AwsWrapper::Error => e
+          rescue AwsWrapper::Error, Aws::EC2::Errors::ServiceError => e
             Result.new(cidr_block: cidr_block, status: false, error: e)
           end
         end
@@ -45,7 +45,7 @@ module Banacle
           begin
             rule_number = delete_network_acl_entry(cidr_block)
             Result.new(cidr_block: cidr_block, status: true, rule_number: rule_number)
-          rescue AwsWrapper::Error => e
+          rescue AwsWrapper::Error, Aws::EC2::Errors::ServiceError => e
             Result.new(cidr_block: cidr_block, status: false, error: e)
           end
         end
