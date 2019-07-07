@@ -11,7 +11,7 @@ module Banacle
       end
 
       def self.help
-        '(create|delete) [region] [vpc_id or vpc_name] [cidr_block1,cidr_block2,...]'
+        '(create|delete|list) [region] [vpc_id or vpc_name] [cidr_block1,cidr_block2,...]'
       end
 
       def parse(text)

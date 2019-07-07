@@ -19,6 +19,10 @@ module Banacle
         new(region, vpc_id, cidr_blocks).delete_network_acl_entries
       end
 
+      def self.list_network_acl_entries(region:, vpc_id:)
+        new(region, vpc_id, cidr_blocks).list_network_acl_entries
+      end
+
       def initialize(region, vpc_id, cidr_blocks)
         @region = region
         @vpc_id = vpc_id
@@ -49,6 +53,16 @@ module Banacle
             Result.new(cidr_block: cidr_block, status: false, error: e)
           end
         end
+      end
+
+      def list_network_acl_entries
+        list = ingress_rules.map { |e| "rule_number (#{e.rule_number}): #{e.cidr_block}" }.join("\n")
+
+        <<~EOS
+        ```
+        #{list}
+        ```
+        EOS
       end
 
       private

@@ -18,6 +18,17 @@ module Banacle
 
       attr_reader :request, :command, :config
 
+      def render
+        case command.aciton
+        when Command::CREATE_ACTION, Command::DELETE_ACTION
+          render_approval_request
+        when Command::LIST_ACTION
+          render_result
+        end
+      end
+
+      private
+
       def render_approval_request
         text = <<-EOS
 <@#{user_id}> wants to *#{command.action} NACL DENY entry* under the following conditions:
@@ -41,6 +52,15 @@ module Banacle
               ]
             ),
           ],
+        ).to_json
+      end
+
+      def render_result
+        result = command.execute
+
+        Slack::Response.new(
+          response_type: "in_channel",
+          text: result,
         ).to_json
       end
 

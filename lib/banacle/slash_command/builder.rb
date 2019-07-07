@@ -38,7 +38,10 @@ module Banacle
         validate_action!
         validate_region!
         validate_vpc_id_or_name!
-        validate_cidr_blocks!
+
+        if Command::CHANGE_ACTIONS.include?(action)
+          validate_cidr_blocks!
+        end
       end
 
       def validate_action!

@@ -6,9 +6,14 @@ module Banacle
     class Command
       CREATE_ACTION = 'create'.freeze
       DELETE_ACTION = 'delete'.freeze
-      PERMITTED_ACTIONS = [CREATE_ACTION, DELETE_ACTION].freeze
+      LIST_ACTION = 'list'.freeze
+
+      CHANGE_ACTIONS = [CREATE_ACTION, DELETE_ACTION].freeze
+      PERMITTED_ACTIONS = [CREATE_ACTION, DELETE_ACTION, LIST_ACTION].freeze
 
       CODE_BLOCK_JSON_REGEX = /```([^`]+)```/.freeze
+
+      class Error < StandardError; end
 
       def self.new_from_original_message(message)
         original_json = JSON.parse(
@@ -32,8 +37,10 @@ module Banacle
           create_nacl
         when DELETE_ACTION
           delete_nacl
+        when LIST_ACTION
+          list_nacl
         else
-          # Do nothing
+          raise Error.new("Unknown action: #{action}")
         end
       end
 
@@ -63,7 +70,7 @@ module Banacle
           cidr_blocks: cidr_blocks,
         )
 
-        format_results(results)
+        format_change_results(results)
       end
 
       def delete_nacl
@@ -73,10 +80,17 @@ module Banacle
           cidr_blocks: cidr_blocks,
         )
 
-        format_results(results)
+        format_change_results(results)
       end
 
-      def format_results(results)
+      def list_nacl
+        AwsWrapper::Nacl.list_network_acl_entries(
+          region: region,
+          vpc_id: vpc_id,
+        )
+      end
+
+      def format_change_results(results)
         results.map do |result|
           t = "#{action} DENY #{result.cidr_block} => "
           if result.status
