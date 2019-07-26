@@ -1,5 +1,7 @@
 # Banacle: Create or delete DENY NACL ingress entries on AWS VPC as ChatOps (Slack Slash Command)
 
+**NOTE: The maximum number of NACL entries associated with a NACL is 20. You might reach this limitation if you receive attacks like DoS frequently. Please consider another way such as AWS WAF in that case.**
+
 ## Installation
 
 Add this line to your application's Gemfile:
